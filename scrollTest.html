@@ -1,0 +1,133 @@
+<html>
+
+<!--
+	-Ease
+-->
+
+<head>
+
+	<title>Scroll Test</title>
+
+	<style type="text/css">
+		#scroll-to {
+			width: 200px;
+			height: 500px;
+			margin-top: 300%;
+			background-color: lightblue;
+		}
+	</style>
+
+	<script type="text/javascript">
+		class ScrollObj {
+			constructor(scrollToElem, scrollSpeed) {
+				this._intval;
+				this._active = false;
+
+				if (scrollToElem) {
+					this.scrollToElem = scrollToElem;
+				} else {
+					console.error('Scroll element not defined');
+					debugger;
+					return;
+				}
+
+				if (scrollSpeed) {
+					this.increaseAmount = scrollSpeed;
+				} else {
+					console.warn('Scroll speed not defined, setting to default');
+					this.increaseAmount = 20;
+				}
+
+				// No scroll!
+				window.addEventListener('scroll', evt => {
+					if (this._active) {
+						evt.preventDefault();
+						this._active = false;
+					}
+				}, false);
+			}
+
+			scroll() {
+				let tempTop = 0;
+				let tempLeft = 0;
+				const pos = this.getPosition(this.scrollToElem);
+
+				const intval = setInterval(() => {
+					if (tempTop >= pos.top && tempLeft >= pos.left) {
+						clearInterval(intval);
+					}
+
+					window.scrollTo(tempLeft, tempTop);
+
+					if (tempTop < pos.top) {
+						tempTop += this.increaseAmount;
+					}
+
+					if (tempLeft < pos.left) {
+						tempLeft += this.increaseAmount;
+					}
+				}, 1);
+
+				this._active = true;
+				this._intval = intval;
+			}
+
+			stop() {
+				this._active = false;
+				clearInterval(this._intval);
+			}
+
+			getPosition(el) {
+				let x = 0;
+				let y = 0;
+
+				while(el && !isNaN( el.offsetLeft ) && !isNaN( el.offsetTop )) {
+					x += el.offsetLeft - el.scrollLeft;
+					y += el.offsetTop - el.scrollTop;
+					el = el.offsetParent;
+				}
+
+				return { top: y, left: x };
+			}
+		}
+	</script>
+
+	<script type="text/javascript">
+		let scrollObj;
+
+		function load() {
+			const scrollTo = document.getElementById('scroll-to');
+			const scrollBtn = document.getElementById('scroll-btn');
+			scrollObj = new ScrollObj(scrollTo);
+
+			scrollBtn.addEventListener('click', evt => {
+				scrollObj.scroll();
+			});
+
+			// scrollBtn.addEventListener('click', evt => {
+			// 	let tempTop = 0;
+			// 	let tempLeft = 0;
+			// 	const increaseAmount = 40;
+			// 	const pos = getPosition(scrollTo);
+
+			// 	evt.preventDefault();
+
+
+			// });
+
+		}
+
+		window.onload = load;
+	</script>
+
+</head>
+
+<body>
+
+	<button id="scroll-btn">Scroll to elem</button>
+
+	<div id="scroll-to"></div>
+
+</body>
+
+</html>
